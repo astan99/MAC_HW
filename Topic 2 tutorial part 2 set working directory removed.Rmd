@@ -1,0 +1,216 @@
+
+
+
+```{r}
+setwd()
+#the setwd will be different for everyone depending on where you've put your data
+
+#what if you don't know your file path? to set your working directory go to 
+#session-->set working directory-->choose the folder where you save your data. For me, this will be my DIDA 130 folder. 
+
+#now if you make a new r chunk, r may forget the working directory from the previous r chunk. it is best to set directory before you import your data. 
+
+#How can I find my file path? On a Windows machine, go to your file explorer
+#It'll show the file path at the top; usually it says something like "> This PC > Documents >...." - if you click on this line, the full file path is shown, and you can copy and paste it right into R
+#Note, however, that R is very picky about slashes in you're using a Windows machine - while Windows uses a backslash, you will need to change it to a forward slash manually (I'll show you what I mean)
+
+#After you set the working directory, let's load in our first package! Dplyr
+
+library(dplyr)
+
+#Usually it'll show some text in red - this is generally not an issue, unless you get an error code that says the package won't load
+```
+Now, we'll load in our first data frame, and then I will show you how to clean it up using dplyr! We're going to play around with some sample data. The data in the folder is American Community Survey data from 2010-12 that was compiled by FiveThirtyEight. It has a breakdown of survey respondents' college majors, their gender, and the number of respondents that were employed after graduation. Note that this data is somewhat outdated (e.g. not every student is represented by only including two genders), but it is good example data for the exercises that follow. We will talk more about designing inclusive surveys later. Make sure you've put the .csv file in your working directory!
+
+Source: https://github.com/fivethirtyeight/data/blob/master/college-majors
+
+
+```{r}
+#Let's read in the data using the read.csv command - this command is how we will load most data in the course
+
+setwd()
+
+majors <- read.csv("college_majors.csv")
+
+
+
+#if your directory isn't working, open a new notebook. Create an R chunk and copy your working directory and the data frame into this new page. Try running the code again.  It will pop up in your global environment and you can then use the data frame across all of the documents.  Sometimes if there is a lot of text and r chunks, the working directory can get weird, but setting it in a new document and creating the data frame there seems to help. 
+
+#How many observations are in this data? How many variables?
+
+#Let's inspect the first few rows of the data to make sure it looks right
+
+head(majors)
+```
+```{r}
+#Let's start learning how to use dplyr!
+#First things first: the pipe symbol, or %>% 
+#The pipe is extremely useful and flexible, and it makes code very easy to follow 
+#Essentially, it allows us to perform multiple operations or functions in a logical order
+#For example, I can write the following code to repeat the previous step:
+
+majors %>% head()
+
+#Here, I am telling R, "take the majors dataframe, then print the first six lines"
+#The pipe is the "then" in the sentence - it tells R what to do next
+```
+
+```{r}
+#The first dplyr function we will learn is filter!
+#Let's say I want to only look at engineering majors. I can use "filter" to select rows of a dataframe based on a logical condition like this:
+
+majors %>% filter(Major_category == "Engineering") %>% head()
+
+#majors is the data frame, filter is the function, Major_category is the variable you want to use to find the Engineering data points, head will give you the first few lines of data. Make sure to type the variable and filter exactly how it appears in the data.
+```
+What did I do there? Let's think through the steps. First, I told R to use the dataframe, majors. Next, I told R to filter the dataframe and only include rows where Major_category is equal to Engineering. Then, I told R that I wanted to see the first six rows of this filtered data. Note that, when using filter, strings are case sensitive. If I had typed "engineering" the new data would have contained zero rows. In addition, note that filtering is a logical operation - that is why I used two equal signs. When I work with characters using "filter", I can R that I want to select rows where a variable is equal (==) or not equal (!=) to a specified value. If I was filtering based on a numeric value, I can also tell R to filter rows that are less than (<) or greater than (>) a specified value. Let's look at some additional examples:
+
+```{r}
+#select majors that have more than 2,000 students:
+
+majors %>% filter(Total > 2000) %>% head()
+```
+```{r}
+#What if I want to filter by multiple categories?
+#First, what if we want to know which category is the largest? We can use a base R function, table(), to look at this:
+
+table(majors$Major_category)
+
+#the table function gives basic summarized information about the variable category. However, it is different than the summarize function which we will get to later. 
+
+#Which is the largest?
+```
+```{r}
+#What if we wanted to filter by the Health and Biology & Life Sciences categories? We can do that like so:
+
+health <- majors %>% 
+  filter(Major_category == c("Health", "Biology & Life Science")) %>% 
+  head()
+
+#health the object, majors is the data set, %>% links the functions, filter is a function, c is the combine function, "Health, Bio, etc" are what you want to filter by, head will show the first 6 rows
+
+health
+```
+What did we actually just do? Let's break it down. First, we told R to use the majors data. Next, we use filter() to select rows that contain either Health or Biology & Life Science in the variable Major_category. Then we asked R to show us the first six rows of the result. You use the c() that we learned before to tell R to filter by multiple character values. We saved this as a new dataframe called health and printed it out. 
+
+Let's look at another function from dplyr. What if, instead of rows, I want to select specific columns in a dataframe. This is also very simple if we use the "select()" function. Let's look at an example, and then I'll explain it in a bit more detail. 
+
+```{r}
+#What if we just want to look at enrollment in each major?
+
+enroll <- majors %>% select(Major, Total)
+
+#enroll is the new object formed by looking at the majors data set then selecting the two columns, Major and Total
+
+#Using select, I just need to tell R the names of the columns that I am interested in selecting. If you look at my new dataframe, enroll, you'll see that I only have two columns. 
+
+#If I'm working with this data, I might want to know which majors have the largest enrollment. Here, we'll use another new dplyr function, arrange() to order the data
+
+enroll <- majors %>% select(Major, Total) %>% arrange(desc(Total))
+
+#enroll is object, majors is the data set %>% (then) select (function) the two columns Major, Total, %>%(then) arrange (function) the Total column in descending order.  Arrange automatically goes into ascending order
+
+#When using arrange(), it's important to note that, by default, this function orders numeric data from smallest to largest (or in ascending order). If you wish to order your data from largest to smallest (in descending order), you must tell R this by putting the variable that you wish to order the dataframe by inside of the function desc(). If you check the help documentation for arrange(), it shows examples using desc() - if you ever forget, just check the help page! It will often have the information you're looking for. I'll show more complicated ways to use arrange() later in the course. 
+```
+
+Let's talk about another important function from the dplyr package: mutate(). This function allows you to easily create a new variable in a dataframe. It works like this: mutate(variable_name = x). X can be any number of things - often, you will create a new variable based on a formula or other variables in the dataframe. Let's go back to the larger majors and dataframe and look at some examples of this in practice!
+
+```{r}
+#The simplest possible variable would just be a number or a letter for every row. I can create a variable like this as follows (I'll show you why this is useful in a bit):
+
+majors1 <- majors %>% mutate(one = 1)
+#majors1 is the new data frame <- that is being created from the majors data %>% then we are using the mutate function (to add a column named "one" that has 1 as each value)
+
+#Take a look at the dataframe to see what this looks like! I've stored this as a new dataframe, majors1. 
+#As I said earlier, often you will use a formula to create a new variable. Let's say, for instance, I want to create a new variable that shows the percentage of each major that are women. I can do this using two existing variables, Total and Women, as follows:
+
+majors1 <- majors1 %>% mutate(women_frac = Women/Total)
+#here we are updating the majors1 data frame asigned by using the existing majors1 data frame then we are mutating (creating) a column named ("women_frac" who's values are formed by dividing the variable Women by the variable Total)
+
+#If we want to know which major has the largest percentage of women, we can add on arrange() at the end to find out:
+
+majors1 <- majors1 %>% 
+  mutate(women_frac = Women/Total) %>% 
+  arrange(desc(women_frac))
+#Which major has the largest percentage of women?
+
+#What if I don't want these new variables anymore? I can easily remove them using select():
+
+majors2 <- majors1 %>% select(-c(one, women_frac))
+
+#Deleting two variables requires two things: a) I need to use a "-" to tell R that I am removing two variables rather than selecting them. b) I need to tell R that I am removing both, so I use c() to communicate that to R. What happens if I don't do that? 
+
+majors3 <- majors1 %>% select(-one, women_frac)
+
+#alternatively, I can put a "-" in front of each variable to accomplish the same goal - using c() becomes very convenient, however, if you are removing a large number of variables at once. 
+
+majors1 <- majors1 %>% select(-one, -women_frac)
+```
+
+I have two more dplyr functions to introduce! The two are summarise() and group_by(). Often, rather than work with raw data, we will want to know information about groups within our data. In the majors data, we might want to know more about each major_category, for example, the number of students in each category. We don't want to count up each one by hand, that would be very tedious! Instead, we can tell R to do this for us, using the two new functions. 
+```{r}
+#If I want R to perform an operation or function by group (in this case, by major_category), I have to tell it to do so using group_by(). This function doesn't change the dataframe in any way - it just instructs R to use the specified groups in any subsequent operations. Using it is as simple as:
+
+majors %>% group_by(Major_category)
+
+#Now, I want to create a new dataframe with the total number of students in each category. We can do this by summing the variable Total within each group. summarise() allows us to do just that - this function creates a new dataframe for a summary statistic of our choosing. Because it is a summary of the data, this function typically collapses the larger dataframe into one that has one value for each group. For example, if we use summarise to calculate the mean of the variable Total (without grouping it), this is what we get:
+
+mean_total <- majors %>% summarise(mean_enroll = mean(Total, na.rm=T))
+#mean total is the new data frame created from the majors data then we are summarising the data (by creating a new column mean_enroll = that is formed by performing the mean function on the Total variable, excluding missing data)
+
+#Note that na.rm=T tells R to ignore any missing values in the data - if there are any values equal to NA in your variable, this is important. 
+
+#In this line of code, the whole data frame is treated as a single group, so the output of summarise is one value. Let's see what happens when we group the data by category. Here, we'll get the total number of students in each category, so we'll use the sum() function as our summary statistic. 
+
+cat_total <- majors %>% 
+  group_by(Major_category) %>% 
+  summarise(total_cat = sum(Total))
+
+cat_total <- majors %>% 
+  group_by(Major_category) %>% 
+  summarise(total_cat = sum(Total, na.rm=T))
+
+#new data frame named cat total created from the majors data then we are grouping the data by the variable Major category (so it is aggregating the data for all of the majors that fall within the broader major categories) then we are summarizing this data to (create a new category called "total cat" which contains the values formed by summing the number of students in each major from the Total variable, we then tell r to ignore any missing data)
+
+#let's look at this new dataframe:
+head(cat_total)
+
+#Uh oh, one of the values is NA! Recall that, when we calculate any summary statistic, R doesn't know what to do with NA values - when it encounters an NA value within a group, it therefore returns NA as the final value. We need to tell it to ignore the NA values to avoid this. 
+
+cat_total <- majors %>% 
+  group_by(Major_category) %>% 
+  summarise(total_cat = sum(Total, na.rm=T))
+
+head(cat_total)
+
+#That should work now! Note that, when I write longer or more complicated code using dplyr, I like to put each additional function on its own line - this just makes the code cleaner and easier to follow. 
+```
+
+```{r}
+#So, this does a really nice job producing one summary statistic for us! But what if we want to create a dataframe with a number of summary statistics about the major categories? This is easy to do with summarise() too! If you look up the help page for summarise(), it lists a number of suggested summary statistics that you can calculate using this function - if you are stuck and need ideas, it's helpful to return to the help page. Let's say I want to know the total students in each category, average enrollment for each department in the categories, as well as the largest and smallest enrollment values for the departments in each category, and the standard deviation of enrollment. Here's how I do it, using the sum(), mean(), min(), max(), and sd() functions that are built into R:
+
+summary_cat <- majors %>% 
+  group_by(Major_category) %>% 
+  summarise(total = sum(Total, na.rm = T), 
+            avg = mean(Total, na.rm = T), 
+            min = min(Total, na.rm = T), 
+            max = max(Total, na.rm = T),
+            sd = sd(Total, na.rm = T))
+#note that standard deviation does not exist for the interdisciplinary category because it only has one major 
+
+#Now we have a nice summary table! Let's arrange the table in an order that makes sense, for example, alphabetically:
+
+summary_cat <- summary_cat %>% arrange(Major_category)
+
+summary_cat
+```
+
+
+Resources
+
+Navarro, D. (2019). Learning Statistics with R. Retrieved from:
+https://learningstatisticswithr.com/book/index.html. 
+
+Wickham, H., François, R., Henry, L. & Müller, K. (2021). dplyr: A grammar of data manipulation. R pack-age version 1.0.6. Retrieved from https:// CRAN.R- proje ct. org/ packa ge= dplyr. 
+
+

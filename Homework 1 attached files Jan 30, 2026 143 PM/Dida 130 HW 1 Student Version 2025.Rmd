@@ -1,0 +1,82 @@
+---
+title: "DiDa 130 Homework 1"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+For this assignment, please use the data that is either generated for you or included on Brightspace, and put your answers in the R code blocks that correspond with each question. 
+
+```{r}
+library(dplyr)
+#Use this data on test grades for the first three questions:
+
+grades_total <- c(98, 77, 65, 82, 91, 95, 86, 74, 75, 81, 91, 80, 79, 55, 92, 88, 82, 69, 70, 90)
+```
+
+Question 1) What is the average grade? Show two ways to calculate this.
+
+```{r}
+mean(grades_total)
+sum(grades_total) / 20
+```
+
+Question 2) Create a new vector of all of the grades that are higher than 80. Show your work for this question.
+
+```{r}
+high_grades <- c(98, 82, 91, 95, 86, 81, 91, 92, 88, 82, 90)
+```
+
+Question 3) There is a mistake in the gradebook! The student who scored an 86 actually got a 90. Show how you could update this vector with this new value using an element.
+
+```{r}
+
+high_grades[5] <- 90
+```
+
+Next, we'll use a dataframe on student grades. Load in the "hw1grades" csv file that is posted on Brightspace.
+We have 20 students in a stats class and have a few pieces of information about each student.  "Grade" is the student's grade in statistics, "study_time" is the number of hours each week that a student spends studying for classes, and "number_class" is the number of classes that a student is taking this semester. Major is the student's major. 
+
+```{r}
+#Set your working directory and load the data
+setwd("/Users/aidenstanton/projects/R/Homework 1 attached files Jan 30, 2026 143 PM")
+
+grades <- read.csv ("hw1grades.csv")
+
+library(dplyr)
+
+```
+
+Question 4) Using one function, show how many students are in each major?
+
+```{r}
+
+```
+
+Question 5) Create a new dataframe that shows the average grade by major. Display this data frame. 
+
+Hint: you will need to use group_by() and then summarise().
+
+```{r}
+
+```
+
+Question 6) Create a new dataframe that summarizes grades and study time by major. The data should be arranged alphabetically, by major. Include the following variables in your summarize argument: average grade, min grade, max grade, average study time, total study time, min study time, and max study time
+
+```{r}
+
+
+
+```
+Question 7) 
+  a) How many hours per class does each student allocate towards studying? Create a new variable (column) to measure this.
+  b) Create a new data frame that summarizes the average study time by major 
+
+Hint 1: you will need mutate() for this. 
+Hint 2: you can calculate a rate (hours per class) by dividing one variable by the other. 
+
+```{r}
+
+
+```
+          

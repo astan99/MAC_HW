@@ -1,0 +1,69 @@
+_____________________________
+
+Topic 2 Practice
+
+_____________________________
+
+```{r}
+setwd("/Users/aidenstanton/projects/R")
+majors_1 <- read.csv("college_majors.csv")
+library(dplyr)
+majors_1
+```
+
+Create a separate r chunk for each question
+Make sure to load dplyr!
+
+1) Create a data frame from the following information
+
+daily income: 100, 50, 100, 20, 600, 250
+city: New York City, Allen Town, Scranton, Merrick, New York City, Scranton
+State: NY, PA, PA, NY, NY, PA
+Age: 25, 15, 28, 16, 37, 41
+
+```{r}
+income <- c(100, 50, 100, 20, 600, 250)
+city <- c("New York City", "Allen Town", "Scranton", "Merrick", "New York City", "Scranton")
+state <- c("NY", "PA", "PA", "NY", "NY", "PA")
+age <- c(25, 15, 28, 16, 37, 41)
+```
+```{r}
+stuff <- data.frame(age, income, state, city)
+```
+
+
+
+
+USE THE COLLEGE MAJORS DATA FOR THE FOLLOWING QUESTIONS
+
+2) Filter the data by the major category of business. Show the first few rows from this filter. 
+
+3)Create a column that shows the proportion of men to women (or men/women) in each major. Arrange in descending order 
+
+*how to interpret the ratio, 1:1 ratio means there's an equal propotion of men to women, >1 there are more men, <1 there are more women
+
+4) We want to know some summary information about the ratio for each major category. Using the group by and summarize function, what is the mean, max, and min ratio for each major category?
+
+
+
+```{r}
+majors_1 %>% filter(Major_category=="Business") %>% head()
+```
+```
+```{r}
+majors_2 <- majors_1 %>% mutate(Men_To_Women = Men/Women) %>% arrange(desc(Men_To_Women))
+```
+
+```{r}
+summary_cat <- majors_2 %>% 
+  group_by(Major_category) %>% 
+  summarize(avg = mean(Men_To_Women, na.rm = T), 
+            min = min(Men_To_Women, na.rm = T), 
+            max = max(Men_To_Women, na.rm = T))
+           
+```
+
+
+
+
+

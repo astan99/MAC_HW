@@ -1,0 +1,373 @@
+---
+title: "DIDA 130: Getting Started in R"
+output:
+  html_notebook: default
+  word_document: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+Welcome to your first R Notebook! 
+
+You'll notice that right now this document is functioning like any word processing  software - we are currently not using R. We will begin to use R once we start typing in one of the gray code blocks below. You can insert a new code block by going to insert > R in the top right-hand side.
+
+```{r}
+#Now, we are working in R
+#Note that if you want to annotate your code or leave comments, you need to use the '#' symbol
+#Otherwise, R thinks that you are typing a command and your code will return an error
+######You can use as many '#'s as you like#########
+#To begin typing R code, simply press enter
+#To improve readability, I like to keep one line of space between comments and code
+#Get into the habit of annotating code now!
+#Annotating your code will help you to remember the steps in your statistical analysis, and it will help others (like me) better understand what you are doing
+
+#let's try typing our first command into R
+
+10 + 30
+
+#Once you have typed the command (or commands) you would like to run, press the play icon at the top of the code block to run the code
+#if you have multiple lines of code in a chunk and only want to run one, you can highlight that line and press ctrl+enter to run a single line
+
+10 * 5
+
+#note that "*" symbolizes multiplication in R
+#The output of your code appears below the code block 
+
+
+```
+```{r}
+#spacing doesn't really matter too much for most R commands, as long as everything is on the same line
+10   *    5
+```
+```{r}
+#Importantly, R has no spell check, so you need to make sure you type everything out correctly
+#R cannot correct your code if you make a mistake, it will just report an error
+#R will usually give you an explanation for the error, but it is not always easy to understand
+#If you get an error and you're not sure what it means, google it! Someone else has probably had the same error before and asked about it online
+10 + 5
+```
+```{r}
+#What happens if I accidentally run a line of code before I'm finished?
+#In an R notebook, it'll tell you when your expression is incomplete (if R can tell - sometimes, you'll forget something but your line of code will still be a complete command, which is a trickier situation to be in - always double check your code!)
+10 + 5
+```
+
+
+```{r}
+#R uses the order of operations (think PEMDAS from HS algebra class) to calculate more complex operations
+
+3 + 4 * 10
+
+
+
+#Remember, the order of operations is 1) Parentheses, 2) Exponents, 3) Multiplication and Division, and 4) Addition and Subtraction. 
+
+```
+What else can R do that a calculator cannot?
+
+```{r}
+#One of the most useful things about R is the ability to store objects and perform operations on them
+#The simplest object that you can create is a single value. We'll learn about other objects later
+#let's say I want to remember the number of cars in the parking lot outside of Old Johnson Hall today - maybe there are 34 cars
+#I can store that value in a meaningful way so I can use it later, like so:
+
+cars <- 34
+
+cars = 34
+
+#Note that the '<-' symbol indicates that something (e.g. a number) is being stored under the name that we've chosen. Here, we've created a new object (variable) called cars.
+
+#Run this block of code! Does anything happen?
+```
+
+On the right-hand side of R Studio you will see the "Environment" tab. This tells us all of the objects that we have stored in our current R Session (our environment). You'll notice that cars appears there under "values".
+
+```{r}
+#Let's use R to print out cars
+
+cars
+
+#or
+
+print(cars)
+
+#either options works! I usually just write the name of the object because it's faster
+
+```
+```{r}
+#Maybe I want to track how popular the parking lot is on different days of the week 
+#Let's say there were 34 cars on Monday and 22 cars on Tuesday
+#We can store both of those values as variables (there are more efficient ways to do this, but we'll get to that later)
+
+cars_mon <- 34
+cars_tues <- 22
+
+#Now, we can perform operations using these variables!
+#How many cars were there on both days?
+
+cars_mon + cars_tues
+
+#What is the average number of cars for the two days?
+
+(cars_mon + cars_tues)/2
+```
+```{r}
+#Wait, I miscounted the number of cars on Tuesday! Can I update the variable?
+#Let's say there were actually 27 cars. We can update it like so:
+
+cars_tues <- cars_tues + 5
+
+#You can also redefine the object to overwrite the incorrect variable:
+cars_tues <- 27
+```
+
+Clearly, objects are very helpful. They are, however, only helpful to you if they are meaningful - creating objects with confusing or overly complicated names might make your life more difficult! Here are some tips and conventions for naming objects in R:
+
+- Object names are case sensitive - Cars and cars can be two separate objects
+- In general, don't make your object names so similar that you can't tell them apart!
+- You cannot use spaces in object names (i.e. "cars_mon" works, but "cars mon" does not)
+- You can use some special characters in names - you will commonly see "_" and "." in place of a space, as I have used in the example. Most special characters will not work, particularly if they mean something else in the R language (e.g. you cannot put a "*" in a   name for obvious reasons; you also wouldn't put quotes around a name in practice)
+- You can use a combination of characters and numbers, but you cannot just use numbers as object names (e.g. "cars1" works, but you can't just name an object "1")
+- Try to be as specific as possible - "cars" is a lot more helpful than just "value" or "example"
+- You will often find yourself typing out object names more than once - shorter names are much more convenient (but again, don't make them so short that you don't know what they mean - it might be tempting to name an object "a" or "b", but if you have many objects in your environment, you may forget what they are later)
+
+
+Let's turn our attention to functions
+```{r}
+
+#Functions are a really important component of R
+#When we use a function, this is often referred to as "calling a function"
+#The content inside of the () are called the arguments of the function
+#let's look at a simple function:
+
+sum(1,2,3)
+
+#we can use our objects as arguments inside of the function call like so:
+sum(cars_mon, cars_tues)
+
+
+#so far, using functions hasn't really been any easier than typing out the operations manually
+#Often, functions will perform operations that we can't easily type out in R
+#That was easy! We can also use multiple functions to perform some complex operations:
+#Here, I've used the function that calculates the square root of a value
+sum(2,4,6) - sqrt(64)
+
+```
+```{r}
+#Sometimes, functions will have multiple arguments. You can check all of the arguments that a function takes by visiting its help page. Let's use the round() function
+
+?round
+
+#based on this, we can see that the round function looks like this:
+#round(x, digits = 0)
+#There are two arguments here: the first is the value to be rounded (x) and the second tells the function how many digits to include after the decimal point. The default value of digits is shown, and it looks like it is set at 0. Let's test this:
+
+round(5.66678)
+
+#what if we change the digits argument? Let's round our value to two digits after the decimal place. We can do this in two ways:
+
+round(5.66678, digits = 2)
+
+#Or, we can simplify the argument:
+round(5.66678, 2)
+
+#You often won't have to use the name of the argument in the call to the function, but it can be helpful to use it so that you know what is happening inside the function. If you do not use the name of the argument, order matters! For example, I can change the order of the arguments if I use the names:
+
+round(digits = 2, x = 5.66678)
+
+#But I must use the arguments in the order specified by the help file if I do not use the argument names. So, this doesn't give me the same result that I was looking for:
+
+round(2, 5.66678)
+
+#In general, I would use the arguments in the specified order to avoid any confusion!
+```
+What if you don't know what function to use? Often, the best way to find other functions is to simply search google; most of the time, someone else has already created a package that contains the function you will need. If you think you know the name of a function, but aren't sure, you can start typing a function in R and press Tab: this will bring up a list of functions to choose from.
+
+Next, we will move on to another useful object type. So far, I have shown you how to store a single value. Often, in statistics, you will need to perform calculations on multiple values. How can we store multiple values at once? The simplest to do this is using an object called a Vector. 
+
+```{r}
+#Let's say I have parking data for an entire week. How can I store that data as a vector? I can use the Combine function, or c(), with a comma after each value I want to store in my vector. Here's what it looks like:
+
+cars_week <- c(34, 22, 31, 25, 20)
+
+#What if I want to inspect one element of the vector? An index would come in handy here! An index tells R which element number to print out; the first element is element 1 and the last is element 5. We can see the number of cars parked on Wednesday (element 3) like so:
+
+cars_week[3]
+
+#That was easy! What if I want to see the cars parked on Tuesday through Thursday? I can use a ":" like so to print those elements:
+
+cars_week[2:4]
+
+#Note that, in R, indexing in this way is inclusive: we've selected all elements between 2 and 4, including elements 2 and 4. Not all programming languages function this way.
+```
+```{r}
+#What if we wanted to change one of the elements of the vector?
+#That's easy too! We can tell R to change just one element like so:
+
+cars_week[2] <- 27
+
+#We have just assigned the number 27 to element 2. 
+```
+```{r}
+#Can we perform computations on the elements of a vector? We sure can! Let's say parking in the lot costs $5/day for each car, and I want to know how much money the University made from parking this week. I can multiply each element by 5 like so:
+
+cars_revenue <- cars_week*5
+cars_revenue
+
+#Note that, if you perform a calculation on the vector (as above) it will alter each element in the vector. If we wanted to just perform the computation on one element, we could have done the following:
+
+rev_tues <- cars_week[2]*5
+rev_tues
+27*5
+
+#What if the cost of parking changes during the week? Here's a new vector of parking prices:
+
+price <- c(5, 4, 10, 6, 4)
+
+#We can multiply a vector by a vector! Can you tell what R did here?
+
+cars_revenue1 <- cars_week*price
+cars_revenue1
+```
+
+```{r}
+#Finally, we can also use functions on our vector:
+
+mean(cars_week)
+
+#Note that, if you don't store the value as an object, R will just print it out (as below). 
+```
+```{r}
+#So far, we have been working with numeric data! But there are a number of different data types that R will allow you to work with. You can find out what type of data you are working with by typing the following:
+
+str(cars_week)
+
+#str gives us a lot of information! If you only want to know the object type, you can use:
+
+class(cars_week)
+
+#This tells us that our vector is numeric! What if we wanted to work with another data type? For example, what if I want to know the make of the cars in the lot? I can store the manufacturer names as a Character String. If I have five cars, it might look like this:
+
+make <- c("toyota", "honda", "chevrolet", "kia", "ford")
+make
+
+#The quotations tell us that each make is a character string; trying to create a character vector without the quotes will throw an error:
+
+make1 <- c("toyota", "honda")
+
+```
+```{r}
+#Why? Because without quotes, R is looking for an object that matches the names toyota and honda. There are no such objects. This is very important to remember when working with characters. You can also use single quotes interchangeably:
+
+make1 <- c('toyota', 'honda')
+
+#I can select elements of a character vector in the same way I did for numeric vectors:
+
+make[3]
+
+#If I check the structure of the vector, R will tell me that it is a character this time:
+
+str(make)
+```
+
+
+
+```{r}
+#What kinds of functions can we use on character vectors? Most of the functions we will be using are only for numeric data. There are a few functions that work for character data. For example, what if we wanted to know how many letters were in each element of the vector? We can use the function nchar() to find out:
+
+nchar(make)
+```
+Next, we'll take a look at a third type of data: logical data. Before we store any logical data, I will first introduce what I mean by this data type. Logical data consists of True and False. We will rarely ever work with this data on its own: usually we use this data to index a vector based on a condition (I'll explain this further in a minute). We can see how logical data is collected by using logical operations. 
+
+```{r}
+#For example, let's test a statement that we know is true. 
+
+2+2 == 4
+
+#Note that you must use the "==" when you are using a logical operation
+#What happens if we input a logical operation that isn't true?
+
+2+2 == 5
+
+#We can do more than test equality. Here are some additional examples:
+
+#Greater than:
+
+2+2 > 4
+
+#Less than:
+
+2+2 < 5
+```
+```{r}
+#Less than or equal to:
+
+2 + 2 <= 5
+
+#Greater than or equal to:
+
+2 + 2 >= 5
+
+#We can also ask R if a value is simply not equal to another value, using a "!":
+
+2 + 2 != 5
+```
+
+```{r}
+
+#I can also perform 'logical operations' on a vector, like the cars_week vector we created earlier
+#Let's find out which days there were more than 30 cars in the parking lot:
+
+cars_week > 30
+
+#If we wanted to, we could also store that as a vector
+
+#Finally, you can use logical operations on text, for example:
+
+"cat" == "cat"
+"cat" == "dog"
+
+```
+
+```{r}
+#We will primarily use logical data to index vectors
+#Say we want to select only the days of the week where there were more than 30 cars in the parking lot
+#We can do that easily like this:
+
+cars_week[cars_week > 30]
+
+#Why did that work? Recall that "cars_week > 30" produced a vector of logical data, where days > 30 returned TRUE and days < 30 returned FALSE
+#When we index a numeric vector by a logical vector in this way, it tells R to only return the numeric vector elements that correspond to TRUE in the logical vector - in this case, the entries for Monday and Wednesday are TRUE because they are >30
+```
+
+```{r}
+#We can also index character vectors
+#Let's say I have the days of the week in a vector:
+
+week <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+#If I want to know what weekdays there were more than 30 cars in the parking lot, I can also index the character vector like this: # nolint: line_length_linter.
+
+week[cars_week > 30]
+
+week[cars_week < 25]
+
+#Here, R matches the elements of each vector by their element number (e.g. Monday and 34 are element 1, Tuesday and 27 are element 2, etc.) and selects the elements in week that correspond with the element numbers in cars_week that are greater than 30
+#Note that order matters here! If my days of the week were out of order, then I would not get the correct answers:
+
+week1 <- c("Tuesday", "Monday", "Wednesday", "Thursday", "Friday")
+
+week1[cars_week > 30]
+
+#If I want to know what days of the week there were either greater than 30 cars or less than 25 cars, I can found out like so:
+
+
+week[cars_week > 30 | cars_week < 25]
+
+```
+
+
+Resources
+
+Navarro, D. (2019). Learning Statistics with R. Retrieved from:
+https://learningstatisticswithr.com/book/index.html. 

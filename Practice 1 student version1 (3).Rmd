@@ -1,0 +1,58 @@
+_____________________________
+
+Topic 1 Practice
+
+_____________________________
+
+Create a separate r chunk for each question
+
+1) type out and run the equation for 100 multiplied by 71
+
+```{r}
+100 * 71
+```
+
+2) what is 8.8819 multiplied by 9.3147591? Using the round function, round your answer to 3 places after the decimal
+
+```{r}
+num <- 8.8819 * 9.3147591
+round(num, 3)
+```
+
+3) create two objects named class 1 and class 2. Assign class 1 the value of 12 and class 2 the value of 16
+```{r}
+class_1 <- 12
+class_2 <- 16
+```
+
+
+4) add class 1 and class 2 together
+
+```{r}
+class_1 + class_2
+```
+
+
+5) We want to track how many students are in 5 sections of History 101. Create a vector with the following information
+  a) name the vector "History_Sections", the number of students in each class are as follows c1 = 12, c2=16, c3=14, c4= 20 c5=22
+
+ ```{r}
+ History_Sections <- c(12, 16, 14, 20, 22)
+ ```
+
+  
+  b) Oops! We miscounted the students in class 3. using the element function, change c3 to 18 students
+
+  ```{r}
+  History_Sections[3] <- 18
+  ```
+  
+
+  c) Each professor of History 101 is collecting money for a fieldtrip. They are going to different museums and each museum charges a different fee. Create a vector that shows how much money has to be collected for each class.  The fees are as follows: c1 - $5, c2 = $10, c3 = $5, c4= $12, c5= $18
+  ```{r}
+  fees <- c(5, 10, 5, 12, 18)
+  overall_cost <- History_Sections * fees
+  ```
+
+
+
