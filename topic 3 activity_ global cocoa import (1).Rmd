@@ -1,0 +1,69 @@
+---
+title: "Topic 3" Plotting with ggplot2 In Class Activity"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+library (ggplot2)
+setwd("C:/Users/owner/Desktop/Fall 2024 Binghamton/DIDA 130/DIDA 130/Data")
+#change the working directory to where you store your data
+
+#1) Create a data frame for the Global import of cocoa beans
+
+
+cocoa_import <- read.csv("Global import of cocoa beans.csv")
+```
+
+#tell r to read the data file
+
+#2) summarise the data to show the total import in tonnes per year for all regions
+#hint--refer to tutorial 2: group by and summarise
+
+```{r}
+cocoa_import %>% group_by(Year)
+
+global_cocoa_import <- cocoa_import %>%
+  group_by(Year) %>%
+  summarise(total_import = sum(Import.in.tonnes))
+```
+
+#create a new dataframe that is created from the original data frame, cocoa_import. then you are grouping the cocoa_import data frame by Year, using the group_by function from DPLYR.  Then you are using the summarise function to create a new variable called "total_import" that is created (=) by adding up all of tones per region per year using the sum function. 
+  
+
+#3)create the base of a plot graph in ggplot with just the aesthetic layer for x and y
+
+```{r}
+ggplot(global_cocoa_import, aes(x=Year, y=total_import))
+```
+
+#4) create a full plot graph in ggplot with blue points
+
+```{r}
+ggplot(global_cocoa_import, aes(x = Year, y = total_import)) +
+  geom_point(color = "blue")  
+```
+
+
+#5) add a line to your point graph to a line graph
+
+```{r}
+ggplot(global_cocoa_import, aes(x = Year, y = total_import)) +
+  geom_line(color = "blue") +
+  geom_point(color = "blue") 
+```
+
+#5) make this more professional! Add labels and a title 
+
+```{r}
+ggplot(global_cocoa_import, aes(x = Year, y = total_import)) +
+  geom_line(color = "blue") +
+  geom_point(color = "blue")  + 
+  labs(y= "Total Import (ton)", x= "Year", title = "Global Import of Cocoa from 2015-2019")
+```
+  
+
+```
+
+

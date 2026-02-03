@@ -1,0 +1,63 @@
+---
+title: "Topic 3" Plotting with ggplot2 In Class Activity"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+library (ggplot2)
+setwd()
+#change the working directory to where you store your data
+#file name is Global import of cocoa beans
+```
+
+#1) Create a data frame for the Global Import of Cocoa Beans
+
+```{r}
+
+```
+
+
+
+#2) summarise the data to show the total import in tonnes per year for all regions
+#hint--refer to tutorial 2: group by and summarise
+
+```{r}
+
+```
+
+
+
+#3)create the base of a plot graph in ggplot with just the aesthetic layer for x and y
+
+```{r}
+
+```
+
+
+#4) create a full point graph in ggplot with blue points
+```{r}
+
+```
+
+
+
+#5)add a line to your point graph to a line graph
+```{r}
+
+```
+
+
+
+#6) make this more professional! Add labels and a title 
+
+```{r}
+
+```
+
+  
+
+```
+
+
