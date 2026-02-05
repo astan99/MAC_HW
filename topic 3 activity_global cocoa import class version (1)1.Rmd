@@ -7,7 +7,7 @@ output: html_notebook
 library(dplyr)
 library(tidyr)
 library (ggplot2)
-setwd()
+setwd("/Users/aidenstanton/projects/R")
 #change the working directory to where you store your data
 #file name is Global import of cocoa beans
 ```
@@ -15,7 +15,7 @@ setwd()
 #1) Create a data frame for the Global Import of Cocoa Beans
 
 ```{r}
-
+Cocoa <- read.csv("Global import of cocoa beans.csv")
 ```
 
 
@@ -24,7 +24,7 @@ setwd()
 #hint--refer to tutorial 2: group by and summarise
 
 ```{r}
-
+total_year <- Cocoa %>% group_by(Year) %>% summarize(total_import = sum(Import.in.tonnes))
 ```
 
 
@@ -32,19 +32,20 @@ setwd()
 #3)create the base of a plot graph in ggplot with just the aesthetic layer for x and y
 
 ```{r}
-
+ggplot(total_year, aes(x = Year, y = total_import))
 ```
 
 
 #4) create a full point graph in ggplot with blue points
 ```{r}
-
+ggplot(total_year, aes(x = Year, y = total_import)) + geom_point(color = "blue")
 ```
 
 
 
 #5)add a line to your point graph to a line graph
 ```{r}
+ggplot(total_year, aes(x = Year, y = total_import)) + geom_point(color = "blue") + geom_line(color = "blue") 
 
 ```
 
@@ -53,7 +54,7 @@ setwd()
 #6) make this more professional! Add labels and a title 
 
 ```{r}
-
+ggplot(total_year, aes(x = Year, y = total_import)) + geom_point(color = "blue") + geom_line(color = "blue") + labs(x = "Year", y = "Imports per year", title = "Cocoa imports per year") + theme_dark()
 ```
 
   

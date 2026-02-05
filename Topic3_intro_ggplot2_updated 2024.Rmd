@@ -9,7 +9,7 @@ Let's learn to make plots in R! While there are some simple plotting functions b
 ```{r}
 
 #Make sure you download ggplot2 first! Let's load in package and set the working directory.
-setwd()
+setwd("/Users/aidenstanton/projects/R")
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -146,7 +146,7 @@ Why is it so hard to work with this data? This data is in a format called "wide 
 
 ```{r}
 #load the long data 
-setwd()
+
 long_data <- read.csv("long_temperature.csv")
 
 head(long_data)
