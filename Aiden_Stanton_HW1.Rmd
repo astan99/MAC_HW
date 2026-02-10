@@ -39,7 +39,7 @@ We have 20 students in a stats class and have a few pieces of information about 
 
 ```{r}
 #Set your working directory and load the data
-setwd("C:/R/Homework/HW01")
+setwd("/Users/aidenstanton/projects/R")
 
 grades <- read.csv ("hw1grades.csv")
 

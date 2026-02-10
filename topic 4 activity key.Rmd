@@ -1,0 +1,71 @@
+---
+title: "Topic 4 activity"
+output: html_notebook
+---
+1) #We have 20 office supplies in a box. 10 staplers, 5 paperclips, 2 pens, 3 pencils. Create a vector that shows how many of each office supply is in the box
+
+```{r}
+
+office <- rep (c("staplers", "paperclips", "pens", "pencils"), time = c(10, 5, 2, 3))
+```
+
+2) show the frequency of each office supply in the box with one function
+
+```{r}
+table (office)
+```
+3) What are the proportions of each office supply?
+
+```{r}
+prop.table(table(office))
+```
+4) Pull a random sample of 4 office supplies from the box. Set seed to 100. What office supplies are pulled from the box?
+```{r}
+set.seed(100)
+sample(office, 4)
+```
+5) a)Pull another sample of 20 office supplies but replace the office supplies each time. 
+   b)create an object for that sample
+   c)replicate this event 50 times
+   d)set seed to 100. 
+
+```{r}
+
+set.seed(100)
+office_event<- replicate(50, sample (office, 20, replace = T))
+                          
+```
+
+6) Create a table that shows the probability of pulling each supply after 50 trials. Is it similar to our original table? 
+
+```{r}
+prop.table(table(office_event))
+
+```
+
+7) We have the following temperature data for 10 days in a given month
+
+```{r}
+temp <- c(80, 90, 71, 31, 67, 82, 74, 93, 99, 91)
+```
+
+8) Based on this data, and assuming a normal distribution, what is the probability that there's one day that is 73 degrees or lower?
+
+```{r}
+mean(temp)
+sd(temp)
+pnorm (73, mean = mean(temp), sd = sd (temp))
+#~40%.
+```
+9) What is the probability that a day falls between 73 and 83 degrees?
+```{r}
+pnorm(83, mean = mean(temp), sd = sd(temp))
+pnorm(73, mean = mean(temp), sd = sd(temp))
+(pnorm(83, mean = mean(temp), sd = sd(temp)) - pnorm(73, mean = mean(temp), sd = sd(temp)))
+```
+10) What is the probability that there is a day hotter than 83 degrees
+
+```{r}
+1-pnorm(83, mean = mean(temp), sd = sd(temp))
+```
+

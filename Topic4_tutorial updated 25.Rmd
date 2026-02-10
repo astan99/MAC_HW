@@ -1,0 +1,298 @@
+---
+title: "Topic 4 Tutorial"
+output: html_notebook
+---
+
+This notebook will be a bit shorter than previous topics. This week's content was more conceptual - it's important that you know and understand the concept of probability, but we won't be calculating probabilities by hand later on. I will use R to demonstrate some concepts in probability theory in R, and you will use these methods in some examples in your homework.  
+
+```{r}
+
+#Let's recreate our marble example in R! We'd rather not write out the color or each marble by hand; instead, we can create a vector with each of the marble colors, and tell R how many of each color to include in our final vector, like this:
+
+marbles <- rep(c("blue", "green", "red"), time = c(3, 5, 2))
+marbles
+
+#The 'rep' function is really useful here. Let's see if our vector matches the example from the lecture:
+
+#rep is the replicate function used in a vector.  In the marbles vector we are repeating the amount of colors x amount of times.  3 for blue marbles, 5 for green, and 2 for red. 
+
+marbles
+
+```
+
+```{r}
+#if we want to know the frequency of each marble color in our bag of marble, we can use the table() function from base R:
+
+table(marbles)
+
+#we can also get the proportions using the table function inside of the function prop.table()
+
+prop.table(table(marbles))
+
+#the proportion table calculates the proportions, X out of total (x/Total) (3 blue marbles/10 total marbles)
+```
+
+```{r}
+#Looks good so far! If I want to draw a sample (at random) from my bag of marbles, I can use the sample() command
+#The syntax works like this: first, I have to tell R which object to draw the sample from, and then I have to tell R how many values to include in the sample. Like this:
+
+sample(marbles, 2)
+#sample function (vector name, how many values in the sample)
+
+sample(marbles, 2)
+
+#What happens if I run it again?
+sample(marbles, 2)
+
+#run the sample a few times to see how it changes
+
+
+```
+
+```{r}
+
+#I can run this code over and over again, and I might get a different sample every time! What if I wanted to make sure the sample doesn't change? This is helpful, for example, if I want others to be able to reproduce my code. I can use a function called set.seed() to tell R to use the same random result every time, like this:
+
+set.seed(100)
+
+sample(marbles, 3)
+
+#Run both lines of code at the same time.   You can put any number you want in the set.seed() function - the trick is to use the same number if you want any two results from a sample function or random number generator to be the same. 
+
+#the set.seed is starting from the same "place" (or is like rolling the dice the same way) every time.  The sample is still "random" but the results will remain consistent. In future assignments, I will tell you what number should be included in set.seed so your results will be consistent with the key.
+
+```
+
+```{r}
+
+#What happens if I draw a marble from the bag ten times? Will my draws match the ten marbles that are in the bag? What do you think? Look at the documentation for the sample function, and tell me what you think! No looking ahead!
+
+?sample
+
+sample1 <- sample(marbles, 10)
+sample1
+marbles
+#new vector made from taking a sample of the vector marbles, 10 marbles total
+#sample(x, size, replace = FALSE)
+#in this function x= vector name, size is the number of objects, replace refers to if you are putting objects back after each round.  If you are replacing it, set replicate to true. if not, set replace to false. In future questions, I will tell you whether or not to replace the objects. 
+
+table(sample1)
+
+```
+
+```{r}
+#Let's try this another way, using the replace argument from the sample function
+
+set.seed(100)
+
+sample2 <- sample(marbles, 10, replace = T)
+
+table(sample2)
+
+#if you don't set the seed, the values in the vector table will change
+```
+
+```{r}
+#Do you understand why the two results are different? In one sample, we didn't replace the marbles in the bag after each draw - this is known as a sample without replacement. In the other, we did replace the marbles. 
+
+#If we replace the marbles in the bag every time, then our ten draws may not be the same as the ten marbles in the bag. However, we know that, as our number of draws approaches infinity, the frequency of drawing a color (e.g. blue) will converge to the frequency of that color marble (blue marbles) in the bag. In other words, if 30% of marbles in our bag are blue, as the number of draws from the bag becomes infinitely large, 30% of our draws should also be blue. But we can't draw from a bag infinite times! How can we test this using R?
+
+#One way is to use a Monte Carlo simulation - this essentially entails repeating an experiment a large number of times so that the result approximates infinite draws. In other words, what if we repeated our ten draws 1,000 times? What about 10,000 or 100,000 times? What would the frequency of blue marbles be then? We can do this using the replicate() function
+
+#think about the frequency graph from the powerpoint. The first few times, the frequency of draws for each marble  from the sample would be all over the place. As the number of trials increases towards infinity, the frequency for each marble draw should get closer to the original proportions. In this instance the original proportions were .3 for blue, .2 for red, and .5 for green. 
+
+
+#tell R how many times to repeat the sample by saving the number as t
+t <- 1000
+
+#remember to use the replace argument for the ten draws
+set.seed(1)
+events <- replicate(1000, sample(marbles, 10, replace = T))
+
+events <- replicate(t, sample(marbles, 10, replace = T))
+
+events
+
+#new vector name created by using the replicate function (how many times the event is repeated, using the sample made from the vector marbles, the total number of marbles is 10, and it is replaced every time)
+```
+
+
+```{r}
+
+#Let's inspect our result! Did we get 30% blue marbles?
+
+prop.table(table(events))
+
+
+```
+
+```{r}
+#That last result looked pretty good already! What if we repeat the experiment 100,000 times?
+#It's a litle bit closer this time! It will take a few secionds because it is repeating the draws a large amount of times
+set.seed(1)
+
+t <- 100000
+
+events <- replicate(t, sample(marbles, 10, replace = T))
+
+prop.table(table(events))
+```
+___________________________________________________________________________________________________
+Introducing the Binomial and Normal Distributions
+___________________________________________________________________________________________________
+
+In this section, we'll learn how to calculate probabilities using the binomial and normal distributions. Why do we use these distributions? In real life data, there are many possible probability distributions: we will usually try to pick a known distribution that best fits the data for our statistical analysis. Distributions like the binomial and normal distributions have known properties that we can work with, and they make our lives a bit easier. 
+
+The distribution functions in base R have four main forms:
+
+What.it.does	                    	Normal.distribution	Binomial.distribution
+probability (density) of	                dnorm()	           dbinom()
+cumulative probability of	                pnorm()	           pbinom()
+generate random number from	              rnorm()	           rbinom()
+calculates quantiles                      qnorm()            qbinom()
+
+dnorm() and dbinom() estimate the exact probability of an outcome, while the p-form estimate a cumulative probability - in this case, you specify a quantile (dividing a value into equal parts), and R will tell you the probability of a result less than or equal to the quantile. The q-form calculates the quantile of the distribution, meaning that if you specify a probability value p, it gives you the corresponding percentile. The r-form generates a random number from the distribution. I'll show you what some of these mean using examples next. 
+
+____________
+dbinom
+____________
+```{r}
+#Using the dice example from the lecture, let's find the probability of rolling five 3's, N = 20 and theta = 0.167
+
+#x. This is a number, or vector of numbers, specifying the outcomes whose probability you’re trying to calculate.
+#size. This is a number telling R the size of the experiment.
+#prob. This is the success probability for any one trial in the experiment.
+
+dbinom( x = 5, size = 20, prob = 1/6 )
+#exact probability outcome, binomial, x= the amount of successes, size= how many trials, prob = theta, the probability of 1 successful outcome
+
+dbinom (x = 5, size = 20, prob = 1/6)
+
+#it is binomial because we only have 2 options, either it is successful or it isn't
+```
+That was simple, right? We just need to specify the result (X), the N value (size), and the theta value (prob). 
+
+You won't need to do this, but let's plot the binomial distribution for this example:
+
+```{r}
+plot(c(0:20), dbinom( x = c(0:20), size = 20, prob = 1/6 ), type = 'h')
+#h stands for histogram like plot, you will not need to do this in an assignment
+```
+Based on this plot, we can look at the Y-value that corresponds with 5 successes, and approximate our probability. 
+X axis = number of successes (rolling five dice with 3s)
+Y axis = probability
+
+```{r}
+#What if I want to know the probability of rolling 5 or fewer 3's? This is where pbinom comes into play!
+
+pbinom( q= 5, size = 20, prob = 1/6)
+#pbinom--want to know 5 or fewer successes, out of 20 trials, with the probability of 1 success
+#p is because we are referring to a cumulative probability (five 3s, four 3s, three 3s etc), binom is because you only have two options, either you roll a 3 or you do not.
+
+#percentile is used for comparison, the higher the percentile, the higher you are compared to others.  eg. if you scored in the 80th percentile on a test, you scored higher than 80% of test takers.
+```
+There is an 89.81% chance that I roll five or fewer 3's with my twenty trials. In other words, my roll would be in the ~90th percentile. 
+
+We can use pbinom to find out the actual percentile of rolling four 3's:
+```{r}
+pbinom( q= 3, size = 20, prob = 1/6)
+
+```
+The normal distribution functions work similarly! The syntax looks like this:
+
+                            pnorm(x = x, mean = μ, sd = σ)
+
+Remember that, unlike the binomial distribution, the normal distribution can be used to estimate probabilities for continuous data. For example, let's say we have the following height data:
+
+```{r}
+
+height <- c(62, 65, 70, 72, 67, 75, 68, 71)
+
+#Based on this data, and assuming a normal distribution, what is the probability that a random person from this population where this sample comes from is 69 inches tall or shorter?
+
+#First, let's look at the mean and sd:
+mean(height)
+
+sd(height)
+
+pnorm(69, mean = mean(height), sd = sd(height))
+
+
+```
+Since the mean is about 69 inches, it makes sense that the probability of being 69 inches or shorter is about 50%. 
+
+You don't need to know how to do this, but let's take a look at 
+```{r}
+#define population mean and standard deviation
+population_mean <- mean(height)
+population_sd <- sd(height)
+#these are the values that we just calculated
+
+#define upper and lower bound (these are the maximum and minimums ranges for your distribution)
+lower_bound <- population_mean - population_sd
+upper_bound <- population_mean + population_sd
+
+#Create a sequence of 1000 x values based on population mean and standard deviation
+x <- seq(-4, 4, length = 1000) * population_sd + population_mean 
+#now we have 1,000 continuous values between 52 and 85. -4 to 4 refers to the number of standard deviations above and below the mean. 
+
+
+#create a vector of values that shows the height of the probability distribution
+#for each value in x (x being the 1,000 values of heights)
+y <- dnorm(x, population_mean, population_sd)
+
+#plot normal distribution with customized x-axis labels
+plot(x,y, type = "l", lwd = 2, axes = FALSE, xlab = "", ylab = "")
+sd_axis_bounds = 5
+axis_bounds <- seq(-sd_axis_bounds * population_sd + population_mean,
+                    sd_axis_bounds * population_sd + population_mean,
+                    by = population_sd)
+axis(side = 1, at = axis_bounds, pos = 0)
+abline(v = 69, col = "blue")
+
+#the blue line is at 69, to show where it falls iin the distribution
+```
+
+
+Remember, also, that for a continuous distribution like this, the probability of a single value isn't even defined! We can, however, calculate the probability that my height will fall within a certain range:
+
+```{r}
+#What is the probability that a ramdom person from this population is between 68 and 70 inches tall?
+
+pnorm(70, mean = mean(height), sd = sd(height))
+pnorm(68, mean = mean(height), sd = sd(height))
+
+(pnorm(70, mean = mean(height), sd = sd(height)) - pnorm(68, mean = mean(height), sd = sd(height)))
+
+#because I am asking about a range, I use p and we are assuming a normal distribution. height is the vector we made a little earlier. So its calculating the probability of being 70 inches or shorter - the probability of being 68 inches or shorter
+```
+
+```{r}
+#we wanted to see the probability of the range between 68 and 70
+plot(x,y, type = "l", lwd = 2, axes = FALSE, xlab = "", ylab = "")
+sd_axis_bounds = 5
+axis_bounds <- seq(-sd_axis_bounds * population_sd + population_mean,
+                    sd_axis_bounds * population_sd + population_mean,
+                    by = population_sd)
+axis(side = 1, at = axis_bounds, pos = 0)
+abline(v = 68, col = "blue")
+abline(v = 70, col = "blue")
+```
+
+```{r}
+#What about the probability that a random person from this population where the sample comes from is taller than 70 inches?
+
+1 - pnorm(70, mean = mean(height), sd = sd(height))
+
+```
+Resources:
+
+Irazarry, R. A. (2022). Introduction to Data Science. Lean Pub. Retrieved from: https://leanpub.com/datasciencebook.
+
+Navarro, D. (2019). Learning Statistics with R. Retrieved from:
+https://learningstatisticswithr.com/book/index.html. 
+
+Resources for drawing plots and computing probability in R:
+
+GeeksforGeeks (2020). Binomial Distribution in R Programming. Retrieved from: https://www.geeksforgeeks.org/binomial-distribution-in-r-programming/. 
+Statology (2019). How to Plot a Normal Distribution in R. Retrieved from: https://www.statology.org/plot-normal-distribution-r/. 
