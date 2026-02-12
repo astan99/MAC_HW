@@ -1,0 +1,837 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Welcome to Topic 5 of the course! This week, we will be learning about descriptive statistics and correlation, both of which are foundational topics to understanding basic statistics. 
+
+Descriptive statistics allow us to understand and really get to know our data - so far, we've learned some simple descriptive statistics, like how to find the mean, minimum, and maximum of a variable. In this section, we will dig deeper into descriptive statistics.
+
+Why do we call them "descriptive"? Put simply, these statistics help us to describe the data - we do not use descriptive statistics to test the relationships between variables (this is called inferential statistics). Before you can conduct any statistical analysis, knowing your data is very important. I will demonstrate different ways to get to know your data in this tutorial. 
+
+```{r}
+
+#To start, let's load in some packages and data:
+
+library(dplyr)
+library(ggplot2)
+library(lsr)
+
+setwd("/Users/aidenstanton/projects/R")
+twitch <- read.csv("twitchdata.csv")
+
+#We'll be working with data on the top 1,000 Twitch streamers for this first part of the tutorial. Let's inspect the data before moving on:
+
+head(twitch)
+
+```
+First, let's talk about visualizing the distribution of the data. A distribution simply shows us all of the possible values of our data, and how frequently those values occur-eg, how many observations fall into that specific value range. Let's start by looking at the most common way to visualize a distribution: the histogram. In this tutorial, we'll mostly focus on the number of followers each twitch streamer has.
+
+```{r}
+#This line of code is simply telling R to show whole numbers rather than scientific notation
+options(scipen = 999)
+
+#we are going to make a histogram based on the number of followers each channel has
+ggplot(twitch, aes(x = Followers))+
+  geom_histogram(fill = "gray80", color = "black")+
+  theme_minimal()
+
+#as a reminder ggplot is the code langague, twich is the data frame, aes is the aesthetic layer where we tell ggplot where to get the values for x and y. We are just telling it to use the variable "Followers" for x because this is a histogram. then we are telling ggplot what kind of graph we want to make, geom_histogram.  We use fill instead of color because the bars of the histogram are known as polygons.  and we are using the minimal theme, theme_minimal. 
+```
+On the x axis, we have the streamers' number of followers.  On the y axis, "count", are the number of streamers that fall into each bin (the rectangles/bar). 
+
+The vast majority of the data is between 0 and 2.5 million. This means that most streamers have between 0 follwers and 2.5 million followers. And there's a small handful of followers that have over 7.5 million followers, 5 million followers.
+
+If we randomly pulled a twitch channel from our data set, we'd most likely to pull channel that has less than 2.5 million followers.
+
+In this histogram, each rectangle is a "bin". A bin is just a range between two numbers in the data.  If there are 30 bins, and our data lies between 0 and 8.9 million, each bin represents about 8,900,000/30 = ~300,000 followers. 
+
+To read this graph, we would say that just over 200 streamers in the data have 300,000 or fewer followers, over 400 streamers have between 300,000 and 600,000 followers, just over 150 have between 600,000 and 900,000 followers, and so on. 
+
+the most things to pay attention to are the distribution, or shape of the data and if there are any outliers.  
+
+In this case, the distribution is not normally distributed, it is rather skewed. It is not in the bellcurve pattern (or normal distribution)
+
+*This next plot is just for your reference, we will not be using it in assignments*
+
+Another way to visualize the distribution of our data is through a density plot. This plot is essentially a smoothed version of a histogram, with "density" on the y-axis - this tells us the probability density function of the variable. The y axis is hard  to interpret, but I'll explain it a bit more in a minute. 
+
+```{r}
+
+ggplot(twitch, aes(x = Followers))+
+  geom_density(fill = "gray80", color = "black")+
+  theme_minimal()
+
+```
+It's hard to interpret the density at any given point, and we won't try to - all you need to know is that, if we add up the area under the curve, it equals 1. 
+
+If you add it up for any given range of values in the data (e.g. taking the area under the curve between 500,000 and 1m followers), you will get the proportion of values in the data that lie in that range. 
+
+These calculations require integral calculus, and we won't be doing that in this class - instead, the density plots can be a nice way to get to know what the distribution of your data looks like. 
+
+We can even use them to compare distributions of two variables in the data set (which is not easy to do with a histogram):the density plot allows you to calculate the area under the curve in a similar way to the normal distribution under probabilities. But we're not going to cover how to calculate that, this is just another tool to help us see the shape of our data. 
+
+```{r}
+#In this next plot, the alpha= argument allows me to change the opacity of the density plots. That way, it's easier to see the two on top of each other. 
+#Note that xlim changes the range of the x-axis - I did this to make viewing the graph easier. I wouldn't necessarily recommend shortening your axis in this way. R gets mad because values are being cut off when I do this. 
+
+#this next density plot is comparing Followers to Followers.gained.  So we are adding two geom layers instead of one geom layer.  The follower density will be in gray and the followers.gained density will be in light blue.  Followers gained refers to the amount of followers that have been added to the streamers account over the year. 
+
+ggplot(twitch)+
+  geom_density(aes(x = Followers), fill = "gray80", color = "black", alpha = 0.6)+
+  geom_density(aes(x = Followers.gained), fill = "lightblue", color = "black", alpha = 0.6)+
+  theme_minimal()+
+  xlim(0, 3000000)
+
+#alpha allows you to change the transparency of your data. alpha = 1 is fully opaque, alpha = <1 is more transparent. 
+
+#xlim allows you to play wit the range of the x-axis. In this case, we are cutting off the x-axis at 3,000,000 followers (so it is not including the outliers in the data)
+
+#now we can see the distribution of followers vs followers.gained, we have many more streamers are concentrated at the lower end of the distribution.
+
+#We are gaining fewer followers over the course of the graph and we have fewer outliers. We'd expect to have more followers than followers gained in a given year, so this makes sense. 
+```
+The Followers gained variable (in blue) is more concentrated around a few values, which is why the distribution is taller. Followers is more spread out across a wider range of values. 
+
+
+```{r}
+#Next, we'll move on to some statistics that are known as "measures of central tendency". This sounds fancy, but you've actually already worked with the most common measure of central tendency - the mean!
+
+#These measures give us a sense of what values are in the middle of our data set, or are most popular/common in the data. 
+
+#You already know how to calculate the mean in R. If we were going to calculate the mean on paper, we would simply add up all of the values in our variable and divide by the number of values. Let's say I have the following five values:
+
+values <- c(8, 10, 15, 6, 2)
+
+#Here is one way to calculate the mean, using the definition for the mean that I just told you:
+
+#we add up the values and then divide by the number of values to get the mean/average
+
+sum(values)/5
+
+#Verify for yourself that it is the same as:
+
+mean(values)
+```
+```{r}
+#Another common measure of central tendency is the median. In a given set of numbers ordered from smallest to largest, the median is simply the middle value. If we reorder our values from above we get:
+
+values <- c(2, 6, 8, 10, 15)
+
+#What is the middle value of these numbers? Let's verify that it is equal to the value from the median() function in R:
+
+median(values)
+
+#if you have an even number of values in a vector, the median is calculated by adding the two most middle values and dividing by 2.
+
+#if your data is not in numerical order from least to greatest, it will still calculate the median correctly. 
+```
+```{r}
+#If we want to calculate the mean or median for our data, it's just as easy:
+
+#function (data frame$variable from the data frame)
+
+mean(twitch$Followers)
+
+median(twitch$Followers)
+```
+The mean and median are quite different for this data set. We will explore when it is better to use the mean (avg.) verus the median. 
+
+When should you use the median or the mean? Let's think about some examples:
+
+1) Blue, Green, Red, Purple, (median, character data)
+Blue, Green, Purple, Red, (because there are no numerical values that correspond to the colors in this example, you could arrange them alphabetically. With this even number of colors, green and purple would be the median)
+
+2) 1st, 2nd, 3rd, 4th, 5th (median, discrete--we can't have 3.5th place)
+
+3) Height Data: 62in., 60in, 72in, 74in, 67in (median or mean because it is continuous)
+
+4) Temperature Data (F): 100, 55, 67, 32, -10 (median or mean because it is continuous)
+
+If the data is discrete or categorical, we can only take the median.
+____________________________________
+
+Going back to the last example using Twitch data, why don't the median and mean equal each other? To explain the difference, I will next draw a graph of the data:
+
+```{r}
+
+#Let's plot a histogram 
+ggplot(twitch, aes(x = Followers))+
+  geom_histogram(fill = "gray80", color = "black")+
+  geom_vline(xintercept = 570054.1, color = "blue")+
+  geom_vline(xintercept = 318063, color = "red")+
+  theme_minimal()
+```
+
+Ok, so here we see the median in red and the mean in blue. The median is simply the middle value in the data - it is only influenced by the middle value (or the middle two values, if there isn't one center point). This is really only influenced by how many values we have. 
+
+The mean, on the other hand, takes all of the values in the data into account. Here we can see that most streamers have between 0 and 2.5m followers, but there are a few streamers with a huge number of followers (we might call these streamers outliers). If we have a large number of outliers, it will pull the mean in a "positive" direction (because the outliers are large numbers we are not working with negative numbers) With positively skewed data, we expect that the mean is larger than the median. 
+
+It would make sense to take the mean and median into account when looking at your data. 
+
+This is what we call right-skewed data - the values taper off on the right-hand side at the extreme end of the distribution. The main problem with skewed data is that very large values also tend to skew the mean, which is why the mean is so much larger than the median value here. 
+
+Using the mean for skewed data might be misleading, so it's always a good idea to check both statistics before choosing the right measure of central tendency for your data. We'll talk more about skewed data soon. 
+
+An alternative is to calculate a trimmed mean - this measure discards the largest and smallest outliers on either end of the distribution to calculate a more robust measure of the mean. This is typically calculated by selecting a percentage of the data to trim - for example, in a 10% trimmed mean, the largest and smallest 10% of values are trimmed, and the mean is calculated on the remaining 80% of values towards the middle of the distribution. A 0% trimmed mean is just a regular mean, while a 50% trimmed mean would be the median. Let's see what this looks like:
+
+```{r}
+mean(twitch$Followers, trim = 0.1)
+median(twitch$Followers)
+#this is a 10% trimmed mean, which trims off the variable's data by 10%. A regular mean is a 0% trimmed mean.
+
+#while the mean is closer to the median, there is still a large difference
+```
+
+```{r}
+
+mean(twitch$Followers, trim = 0.5)
+
+#this is a 50% trimmed mean, which trims off the variable's data by 50%. And this value will be the same as the median.
+
+median(twitch$Followers)
+
+```
+A word of caution when using trimmed means: We typically won't use them, because the selection of the percent to trim can seem a bit arbitrary. Should we trim 5%? 10%? 
+
+We can typically use the median with skewed data for this reason. However, when using a trimmed mean, transparency is key: you should always state the percentage that you will be trimming, and the reason you chose that value. 
+
+Let's talk about another measure of central tendency: the mode! The mode of a set of numbers is essentially the most common number in the set. Let's look at an example of height data (in inches):
+
+                            62, 65, 72, 68, 65, 71, 60, 65, 69, 68
+
+The mode is the number that repeats the most in a data set. 
+
+What is the mode of this data? What about the mode of the Followers variable? Let's take a look
+
+```{r}
+#You will need to download the lsr package - base R does not have a function to compute the mode of a dataset
+#If you have trouble downloading, check the package github here: https://github.com/svannoy/lsr-package 
+install.packages("lsr")
+library(lsr)
+
+#there is no built in mode function in the base code of R, but we can use lsr package to calculate the mode.
+
+modeOf(twitch$Followers)
+
+```
+What happened here? Why is the mode 1,000 different values? It is telling us that there are no two streamers that have the exact same follower count. The mode is not a common measure that you'll see and most real world data is messy. 
+
+When working with interval or ratio data, the mode works best when have data that has a limited range of possibilities, where there are certain to be repeated values - for instance, height data. Our followers data is continuous data that ranges between 0 and 8.9 million - it's unlikely that any two streamers would have the exact same number of followers! You might also use the mode for nominal or ordinal data. Because of this, while it can tell us some interesting information about our data, it is not used as commonly as the mean or median. 
+
+________________________________________________________________________________________
+                                      Measures of Variability
+________________________________________________________________________________________
+
+Let's move on to measures of variability in the data! These measures typically tell us how spread out the data is, or how far away observations typically are from the mean and median values. We'll start with a very simple measure: the range. 
+
+```{r}
+#The range of a variable tells us the distance between the minimum and maximum value in the data. What is the range of our followers data?
+
+range(twitch$Followers)
+
+#min is 3660 and the max range is 8.9 million
+```
+Here we can see that the least popular streamer has 3,660 followers, while the most popular has 8,938,903 followers, for a range of 8,935,243. To be honest, this doesn't actually tell us that much about the data, except that there is one streamer with a huge following. Let's look at some slightly more descriptive measures of variability.
+
+Interquartile range (IQR) is the range for the middle 50% of the data.
+
+The IQR range calculates the difference between the 25th and 75th percentile of the data - the 25th refers to the smallest value (x) such that 25% of the data is less than x You've probably seen percentiles before, for example, on standardized test scores - e.g. if you score in the 90th percentile on a test, 90% of the test takers' scores were lower than your score. 
+
+This is looking at the middle 50 percent of our data (between 25th percentile and 75th percentile)
+
+```{r}
+#I'll explain how we use this in a minute, but we can use the quantile() function in R to compute the value at any percentile:
+
+quantile( x = twitch$Followers, probs = .5)
+
+
+#quantile function, x= dataframe$variable from the dataframe, probs *probability* =.5
+
+#.75-.25=.5 (75th percentile minus the 25th percentile is the middle 50% of the data)
+#Unsurprisingly, the value at the 50th percentile is also equal to the median. 
+
+#To get the start and end values of the quantiles, you can use the quantile function like this:
+
+quantile( x = twitch$Followers, probs = c(.25,.75))
+#quantile function (x = dataframe select variable, probs = combine (quartile, quartile))
+
+#if you subtract the values from the 25% from 75%, you get the range amount from 50%
+624332.2 - 170546.2
+
+```
+```{r}
+#This is nice and all, but how can we actually calculate the interquartile range?
+#There actually another function that does this, IQR(). Let's try it out:
+
+#interquartile range
+
+IQR(twitch$Followers)
+
+#between the streamer in the 25th percentile and the streamer in the 75th percentile of the data, there is a range 453,786 followers. 
+
+```
+```{r}
+
+IQR(twitch$Followers)/2
+#if you cut the previous value in half, it tells us  the vast majority of the data is between +/- 226,893 followers from our median, or the middle 50% value
+```
+
+How do we interpret this? The interquartile range is the range that is spanned by the "middle half" of the data. This measure if particularly useful when there are extreme values in the data - I will explain this more later, when we introduce the standard deviation measure. 
+____________________________
+AVERAGE ABSOLUTE DEVIATION
+____________________________
+
+Another way to measure the spread of the data is to think about deviations from a center point. In this next measure, we'll talk about the mean absolute deviation of the data, which essentially asks: by how much does a typical value deviate from the mean? 
+
+We can calculate this measure in the following way: 
+
+(1)first, calculate the mean (or median) of the data. 
+
+(2)Second, calculate how much each value in the data deviates from the mean, taking the absolute value of the deviations. Absolute value refers to the values distance from zero on the number line. Regardless of if the number is positive or negative, the absolute value will always be a positve number. For example, 5-8 = -3, the absolute value |-3| of that equation is positive 3.
+
+                              ___|__|___|___|__|__|__|__|__|___
+                                -4 -3  -2  -1  0  1  2  3  4
+
+(3) Finally, add up those deviations and calculate their mean. An example might make this more clear:
+
+```{r}
+#Create some data
+#lets say these are test scores on a quiz out of 15 points
+
+datasample <- c(5, 8, 12, 15, 2, 6)
+
+#Find the mean 
+mean_of_data_sample <- mean(datasample)
+#the mean score out of this quiz was 8
+
+#find the absolute value of the deviations
+deviations_of_data_sample <- abs(datasample - mean_of_data_sample)
+
+#deviations = (5-8, 8-8, 12-8, 15-8, 2-8, 6-8)
+              #(3,   0     4     7     6    2)
+
+#this next set of values shows that there was some deviation from the mean across the five scores. 
+
+#absolute deviations
+
+#Take the mean of the deviations
+mean(deviations_of_data_sample)
+
+#on average, most values in the data deviate from the mean by about 3.67
+#this is a very simple way to explain how spread out the test scores were. If the mean of the deviations was closer to 0, it meant that there was little variation in how well students did on the quiz.  
+
+#But because it is a bit higher than 0, it means that there was some variation with some students doing a little bit better and some students doing a little bit worse than the mean.  So this can give us information about the future--perhaps how to make the exam harder or easier, tracking study habits of students, adjust lesson plans, etc. Finding the deviation gives us information to make predictions. 
+```
+```{r}
+#Using the lsr package, we also have a useful function to calculate this, which is particularly helpful when your dataset is very large:
+#note that AAD stands for "average absolute deviation"
+library(lsr)
+
+aad(datasample)
+
+```
+Similarly, we can also calculate the Median Absolute Deviation! If we write it out, it looks like this:
+
+```{r}
+median( abs(datasample - median(datasample)))
+#we are finding each value's deviation from the median
+
+#this tells us that most of the values within the data vector are about 3.5 values away from the median
+```
+
+_________________________________
+MEDIAN ABSOLUTE DEVIATION
+*additional example in supplemental tutorial
+_________________________________
+```{r}
+
+#We can interpret this value as the amount that a typical value deviates from the median. The lsr package also has a function to calculate it:
+
+mad( x = datasample, constant = 1 )
+#mad stands for median absolute deviation, x = vector/object, constant = 1
+
+#always include constant =1
+
+#Why do we use the constant = 1 argument? It's a bit complicated, but essentially, the mad function can be used to calculate a measure using the median that approximates the standard deviation of the data (which we'll introduce in a moment). The default value, 1.4826, can be used to multiply the mad to get a measure that is comparable to the standard deviation; by setting constant to 1, we are essentially telling R not to do this. 
+```
+both of these measures, aad and mad, help us to understand the shape of our data, especially in a skewed sample. 
+
+let's take a look at the supplemental tutorial
+_______________________
+
+Variance
+_______________________
+
+These are interesting measures, but a much more common measure in statistics is the Variance. 
+
+This is calculated quite similarly to the mean absolute deviation, but we'll square the deviations instead (for reasons I'll get into in a moment).
+
+You calculate the variance like this: 1) Find the mean of the data. 
+
+2) Find the deviation of each value from the mean, and square it. 
+
+3) Add up the squared deviations and divide by the number of values to get the mean squared deviation (aka the Variance). Let's look at an example again. 
+
+```{r}
+#find the mean
+
+mean <- mean(datasample)
+
+#find the squared variance
+
+dev <- (datasample - mean)^2
+
+#(datasample-mean, you are taking each value in the vector and subtracting the mean)^2, then you are squaring them.  This forms the new vector, dev (short for)
+
+dev
+
+#find the mean of the squared deviations
+
+mean(dev)
+```
+There is a function in R that will allow us to calculate the variance in one line, but it requires some explaining. Let's look at an example:
+
+```{r}
+var(datasample)
+```
+Why did we get 22.8, and not 19?? Let's look under the hood of this function, shall we?
+
+```{r}
+?var
+#we can use the help document for the var function to understand why there is a difference between the long format variance and using the variance function
+```
+When we calculate a mean, the denominator is always the number of values in the data (or n). 
+
+But R is using (n-1) as the denominator - why is that? 
+
+When we just use n, this gives us the variation of the sample. 
+
+However, a sample is just a snapshot of the real world, and we're interested in using this snapshot to make inferences about the our broader population of interest. 
+
+When we want to estimate a "population parameter" rather than just a "sample statistic", we use (n-1) in the denominator. This a "correction" that statisticians make so that the sample approximates the population. This will hopefully make more sense later, but I'll verify that this is the case here:
+
+```{r}
+sum((datasample - mean(datasample))^2)/(6-1)
+
+#sum function (of the data, data frame - mean (of the data data frame))^2 (squaring the values inside the data-mean parentheses) and dividing sum() by n-1, n=6 
+
+#variance is the mean of the squared deviation
+
+#in the parentheses of sum(we are calculating the deviance of the values in the vector, squaring them, and then adding them together). We are then taking that value and dividing it by n-1 (6-1)
+
+```
+Finally, if this measure is so popular, how do we interpret it? To be honest, there isn't an easy or obvious interpretation. Instead, we'll often use the variance to calculate the standard deviation, which is much easier to understand. 
+
+The Standard Deviation (SD) is simply the square root of the variance, or the "root mean squared deviation" (RMSD). We also have a very easy way to calculate this in R (note again that R uses n-1 in the denominator here):
+
+```{r}
+sd(datasample)
+```
+SD tells us how spread out the data is. It is showing how far away each set of values is from the mean. Lower SD means the data is clustered around the mean. Higher SD means the data is spread out from the mean. 
+
+So what exactly does this mean? There isn't an exact interpretation, but there is a rule of thumb that most people use to make sense of the SD. 
+
+In general, 68% of the data will fall within 1 standard deviation of the mean, 95% will fall within 2 standard deviations, and 99.7% will fall within three standard deviations.
+
+This isn't exact (e.g. sometimes it'll be more like 65 or 63% actually fall within one standard deviation), but it's a pretty good rule for understanding what the SD means. 
+
+Let's sqitch to the supplemental tutorial to  look at another example:
+
+```{r}
+#Let's look at our histogram again of Twitch followers:
+
+ggplot(twitch, aes(x = Followers))+
+  geom_histogram()+
+  theme_minimal()
+```
+```{r}
+#For example purposes, we're going to transform the data so it looks normally distributed (don't worry about the transformation right now). 
+
+ggplot(twitch, aes(x = log(Followers)))+
+  geom_histogram()+
+  theme_minimal()
+
+#Now we'll calculate the standard deviation of the data
+```
+```{r}
+
+#don't worry about the code here! I'm just isolating the data that is within 1 standard deviation of the mean followers
+
+sd <- sd(log(twitch$Followers))
+
+sd1 <- twitch %>% 
+  filter(log(Followers) <= (mean(log(Followers))+sd) &
+           log(Followers) >= mean(log(Followers))-sd)
+
+
+ggplot(twitch, aes(x = log(Followers)))+
+  geom_histogram()+
+  geom_histogram(data = sd1, aes(x = log(Followers)), fill = "blue")+
+  theme_minimal()
+```
+
+What am I illustrating here? Around 68% of the streamers in our data should be within 1 standard deviation of the mean. In this data, it's more like 70% of streamers, but it's still pretty close! The streamers within one standard deviation of the mean are represented by the blue area in the histogram. Streamers in the gray area are more than one standard deviation away. 
+
+We can also use standard deviation to find outliers in the data! For example, let's go back to the raw followers data (before I transformed it for plotting purposes). 
+
+```{r}
+#Generally, any values that are + or - 3 standard deviations from the mean are very extreme - these can be reasonably deemed outliers. Let's see if there are any outliers in our followers data:
+
+sd1 <- sd(twitch$Followers)
+#this is the standard deviation for the amount of followers for each twitch streamer
+
+outlier <- twitch %>% 
+  filter(Followers > (sd1*3))
+
+#we are filterning the data to only show streamers with follower amounts larger than 3 standard deviations of the mean--it is telling us whcih streamers are outliers
+
+outlier
+```
+It looks like 32 streamers have follower counts that are larger than 3 times the standard deviation of our data - those are some really high follower counts! These streamers typically have more than 2.5 million followers. This is a more systematic way of determining the outliers in the data. 
+
+How do you decide which measure of variability to use? Here's a helpful summary of each measure from the book:
+
+*Range. Gives you the full spread of the data. It’s very vulnerable to outliers, and as a consequence it isn’t often used unless you have good reasons to care about the extremes in the data.
+
+*Interquartile range. Tells you where the “middle half” of the data sits. It’s pretty robust, and complements the median nicely. This is used a lot.
+
+*Mean absolute deviation. Tells you how far “on average” the observations are from the mean. It’s very interpretable, but has a few minor issues (not discussed here) that make it less attractive to statisticians than the standard deviation. Used sometimes, but not often.
+
+*Variance. Tells you the average squared deviation from the mean. It’s mathematically elegant, and is probably the “right” way to describe variation around the mean, but it’s completely uninterpretable because it doesn’t use the same units as the data. Almost never used except as a mathematical tool; but it’s buried “under the hood” of a very large number of statistical tools.
+
+*Standard deviation.** The most common measure of variation you'll see in statistics. This is the square root of the variance. It’s fairly elegant mathematically, and it’s expressed in the same units as the data so it can be interpreted pretty well. In situations where the mean is the measure of central tendency, this is the default. This is by far the most popular measure of variation.
+
+*Median absolute deviation. The typical (i.e., median) deviation from the median value. In the raw form it’s simple and interpretable; in the corrected form it’s a robust way to estimate the standard deviation, for some kinds of data sets. Not used very often, but it does get reported sometimes.
+
+**In general, I have seen the standard deviation used more than anything else, but it's helpful to be familiar with all of these measures - the standard measure may vary depending on what field you're in, and there may be specific instances when one measure is more suitable than another. 
+
+________________________________________________________________________________________
+                                         Skew and Kurtosis
+________________________________________________________________________________________
+
+The skew and kurtosis of your data is helpful to know, although I don't often see them in any journal articles. As I mentioned earlier, skew essentially tells us if our data is asymmetric, and, if so, the direction of that asymmetry. As a refresher, let's look at the data from earlier that was positively skewed:
+
+```{r}
+ggplot(twitch, aes(x = Followers))+
+  geom_histogram(fill = "blue")+
+  theme_minimal()
+```
+In this data, there are a few very large values that skew the data in a positive direction. What about negatively skewed data? Let's see what this looks like:
+
+```{r}
+ggplot(twitch, aes(x = -Followers))+
+  geom_histogram(fill = "red")+
+  theme_minimal()
+```
+This is considered negatively skewed, because there are a small number of very negative values in the distribution that might skew the mean negatively. We can use the skew() function in the psych package to verify the skew of the data (although you can usually tell pretty easily from a visual inspection!)
+
+In a positive skew, the mean is pulled up in a positive (number) direction. The mean is higher than the median 
+
+in a negative skew the mean is pulled down in a negative (number) direction. The mean is lower than the median. 
+
+```{r}
+library(psych)
+
+skew(twitch$Followers)
+
+skew(-twitch$Followers)
+
+```
+It's pretty easy to tell just by looking at the data if it's skewed, so we won't really be using this function (although it's good to know!). While positive values tell us that the data is positively skewed, negative values indicate negative skew. 
+
+Finally, the kurtosis of the data is its "pointiness". We won't really use this measure but, again, it's helpful to be aware of. Remember this graph from earlier?
+
+```{r}
+ggplot(twitch, aes(x = log(Followers)))+
+  geom_histogram()+
+  theme_minimal()
+
+
+#We can find the kurtosis of the graph with a function from the psych package:
+
+kurtosi(log(twitch$Followers))
+
+```
+Data that is perfectly normally distributed will have a kurtosis value of 0 (this data  is just pointy enough). 
+
+The slightly positive kurtosis value of this graph tells us that is slightly more pointy (or taller) than normal
+
+while a negative value would have indicated that the graph was slightly less pointy (or shorter) than normal. 
+
+Like I said, good to know, but don't worry too much about this concept. 
+
+________________________________________________________________________________________
+Calculating Multiple Summary Statistics at Once
+________________________________________________________________________________________
+
+What if I want to create a table that calculates multiple of these values at once? I'll show you a few ways to do this. 
+
+```{r}
+#The first is a base R method that uses the summary() function
+
+summary(twitch)
+
+```
+This function tells us the minimum, maximum, mean, median, and the 25th and 75th quartiles. This is a lot of helpful information! 
+
+You'll want to put this summary information into a table for future projects or assignments
+
+What if we want summary statistics by group? We can use the by() function to do this:
+
+```{r}
+#We'll look at statistics for mature and non-mature twitch channels 
+by(twitch, INDICES=twitch$Mature, FUN=summary )
+
+#by (dataframe, indicides are the grouping variable = dataframe$variable you're grouping by,FUN = what function are you using, summary to get the summary statistics )
+```
+
+These methods are not very pretty though, are they? We can make nicer descriptive statistic tables using the dplyr package, although the code is a bit less elegant. 
+
+___________________________________________
+Descriptive Statsitcs table
+___________________________________________
+```{r}
+
+library(dplyr)
+#Creating an actual descriptive statistics table by hand can be a little more tedious, but it is usually worth it - once you've created the table, you can always save it as a csv and open it in Excel or copy and paste it into a paper. 
+sum_stats_twitch1 <- twitch %>% 
+  #Select the variables we want to summarise
+  select(c(Peak.viewers, Average.viewers, Followers)) %>% 
+  ungroup()
+
+#new_object_name <- created from the twitch dataframe then (%>%) we are selecting a combination of variables, then ungroup in case the data was previously grouped
+
+#The across () function tells R to calculate the summary statistic across each variable
+#The syntax is across(columns, function)
+#First we tell R which columns to use, and then we tell it what function we want to use on those columns
+#everything() tells R to use all of the data 
+#Within a call to across(), any functions you use should start with a '~' and you should include a '.' inside the function call to indicate that the function should be applied to the columns specified 
+
+#this will calculate these functions across all of these selected variables within the dataframe
+
+#we want one column for each summary variable that we will calculate across each variable
+
+mean <- sum_stats_twitch1 %>% summarise(across(everything(), ~mean(.)))
+median <- sum_stats_twitch1 %>% summarise(across(everything(), ~median(.)))
+min <- sum_stats_twitch1 %>% summarise(across(everything(), ~min(.)))
+max <- sum_stats_twitch1 %>% summarise(across(everything(), ~max(.)))
+iqr <- sum_stats_twitch1 %>% summarise(across(everything(), ~IQR(.)))
+
+#Right now, each summary statistic is in it's own dataframe, but we want to create one table! We can use rbind() to tell R to essentially paste the rows from each dataframe on top of each other to create one dataframe
+
+#When binding together dataframes, remember that rbind() is used when rows need to be stacked on top of each other. If you need to attach two or more dataframes by their columns, use cbind(). 
+
+twitchstats <- rbind(mean, median, min, max, iqr)
+
+#as it stands now, we have column names but not row names. The next code provides the row names to this new table
+
+rownames(twitchstats) <- c("mean", "median", "min", "max", "iqr")
+
+#we always want to have quotations around the row names or else r will confuse them for objects
+
+#keep the rows in the same order that we used for rbind
+
+head(twitchstats)
+```
+What if we want descriptives by group? We can do that too! But it gets a bit clunkier. 
+
+```{r}
+
+#Let's say you wanted to break this down by group--mature vs. notmature.
+
+sum2_twitchstats <- twitch %>% 
+  #Select the variables we want to summarise
+  select(c(Peak.viewers, Average.viewers, Followers, Mature)) %>% 
+  ungroup() %>% 
+  group_by(Mature)
+
+#here, instead of everything(), I'm telling R to only summarise the first three columns
+#Mature is logical data, and our grouping variable - it would make no sense to summarise it
+mean2 <- sum2_twitchstats %>% summarise(across(c(Peak.viewers:Followers), ~mean(.)))
+median2 <- sum2_twitchstats %>% summarise(across(c(Peak.viewers:Followers), ~median(.)))
+min2 <- sum2_twitchstats %>% summarise(across(c(Peak.viewers:Followers), ~min(.)))
+max2 <- sum2_twitchstats %>% summarise(across(c(Peak.viewers:Followers), ~max(.)))
+iqr2 <- sum2_twitchstats %>% summarise(across(c(Peak.viewers:Followers), ~IQR(.)))
+
+#Right now, each summary statistic is in it's own dataframe, but we want to create one table! We can use rbind() to tell R to essentially paste the rows from each dataframe on top of each other to create one dataframe
+#When binding together dataframes, remember that rbind() is used when rows need to be stacked on top of each other. If you need to attach two or more dataframes by their columns, use cbind(). 
+
+stats_twitch2 <- rbind(mean2, median2, min2, max2, iqr2)
+
+##instead of having 5 objects we have 10. Each summary statistic has two rows now - one for True and one for False. We have to name them accordingly
+
+rownames(stats_twitch2) <- c("mean_f", "mean_t", "median_f", "median_t", "min_f", "min_t",                             "max_f", "max_t","iqr_f", "iqr_t")
+#t() is the function for transpose - this essentially just tells R to flip the data so that the rows become columns and columns become rows. This is not terribly important at the moment
+
+stats_twitch3 <- stats_twitch2 %>% arrange(Mature) %>% t()
+
+stats_twitch3
+
+#instead of having the descriptive stats as rows, the t for transpose flips the columns and rows.
+```
+So there you have it! I wouldn't recommend creating a summary table for more than two or three groups - at that point, the table would become pretty large and cumbersome. When we present summary statistics (either in class, in a presentation, or in our research), our goal is to tell a story with data in the simplest and most accessible way possible. Often, an audience will lose interest during a presentation if you show a giant table, and most readers will skip over it. It's often more effective to show graphs, charts, and other visuals to communicate this kind of information instead. 
+
+
+_______________________________________________________________________________________
+Standardization and Correlation
+_______________________________________________________________________________________
+
+Often, when comparing values in our data, we won't just look at the raw numbers - for example, I could say that I have 2,601,858 followers, but what does that really mean? I know that my follower count is still 6.3 followers less than the top streamer, but still almost 2.6 million streamers more than the streamer with the lowest follower count. But that's till not terribly meaningful. 
+
+Often, we'll standardize our data to make it easier to compare. 
+
+One way to standardize is with z-scores: a z-score essentially tells us how many standard deviations above (or below) the mean a value is. We calculate it like this:
+
+                standard score = (actual value - mean for that variable)/(standard deviation)
+
+A z-score of 0 indicates that the value is pretty close the average. What is the z-score of my 2.6 million followers?
+
+```{r}
+(2601858 - 570054.1)/(804413.4)
+
+#we are looking at the followers variable
+#(actual value of followers for a certain streamer-the mean of followers)/standard deviation of followers and this gives us the z score
+
+```
+So my follower count is 2.5 standard deviations above the mean! This indicates that this streamer is more of an outlier! That's pretty large. 
+
+If I change it to 300,000 followers...
+```{r}
+(300000 - 570054.1)/(804413.4)
+#tells us that we are very close to the mean and we're not really an outlier
+```
+Another way we can think of this is in terms of percentiles, which we can calculate using the pnorm() function.
+
+This next example is going back to the outlier streamer
+```{r}
+pnorm(2.525821)
+
+```
+This essentially puts me in the 99th percentile of streamers! Not bad. This means that 99% of streamers have less followers than me.
+ 
+
+```{r}
+pnorm(-0.3357156)
+```
+______________________________________________
+
+Another big benefit of z-scores is that they allow us to compare different measures. For example, I'm in the 99th percentile of followers, but what about average viewers? 
+
+Let's say I have 3,478 average viewers per stream. What is my z-score now?
+
+```{r}
+(3478 - mean(twitch$Average.viewers))/sd(twitch$Average.viewers)
+
+#(value - mean(dataframe$variable))/standard deviation (dataframe$variable)
+```
+```{r}
+#-0.15 tells me that I'm pretty close to average - I'm less than one standard deviation below the mean. What about my percentile?
+
+pnorm(-0.1541387)
+```
+This only puts me in the 44th percentile, while I'm in the 99th percentile for followers. Looks like my viewership needs a bit of work. 
+
+________________________________________________
+
+There are other ways to standardize data - for example, you could look at my follower count as a percentage of the total number of followers in the sample. But we won't dig much further into this topic for now. 
+
+______________________________________________
+Correlation
+______________________________________________
+
+Finally, let's talk about correlation! Z-scores are one way that we can compare two variables. A more formal way to compare two variables is to look at their relationship with one another. For example, let's visualize followers and peak viewer counts for our sample of twitch streamers. 
+
+```{r}
+ggplot(twitch)+
+  geom_point(aes(x = Followers, y = Peak.viewers))+
+  theme_minimal()
+```
+The relationship looks roughly linear - streamers with higher follower counts also tend to have higher peak viewership. We can quantify this relationship more formally using Pearson's Correlation Coefficient (or the correlation coefficient, more commonly), r. This value ranges from -1 to 1, with -1 indicating a perfect negative relationship, 0 indicating no relationship, and 1 indicating a perfect positive relationship. 
+
+First, let's start with covariance. Formally, the covariance between any two variables is "the mean value of the product of the deviations of two variates from their respective means." I'll show you the formal formula for this at the end, but it looks something like this:
+                  
+                   covariance = (1/ (N-1))* sum((x - xm)(y - ym))
+                   
+Where N is the number of observations, and xm and ym are the means of the x and y variables. Like correlation, two variables whose covariance is 0 are unrelated, and positive and negative values indicate the direction of the variables' relationship. However, it's hard to interpret. 
+
+The actual units of the covariance of followers and peak viewers are literally "followers x peak viewers". What does that even mean? To simplify things, we use Pearson's correlation coefficient, which is a standardized version of the covariance. To calculate, it looks like this:
+
+                       correlation = (covariance)/(sdx*sdy)
+                       
+So we find the covariance and divide by the product of the standard deviation of variables x and y. Don't worry, we don't usually need to calculate this ourselves - base R has a useful cor() function to do it for us!
+
+```{r}
+cor(twitch$Followers, twitch$Peak.viewers)
+```
+This means we have a moderately strong correlation between followers and peak viewers
+__________________________________________
+Another nice feature of the cor function is that we can look at the correlation between many variables:
+
+```{r}
+vars_twitch <- twitch %>% select(c(Followers, Average.viewers, Peak.viewers, Followers.gained,
+                            Stream.time.minutes.))
+
+cor(vars_twitch)
+
+cor_table_twitch <- cor(vars_twitch)
+
+#we can easily look at the correlations between two different variables. Look to the variable you're first interested in in the rows, and match that to the 2nd variable you're interested in in the columns.  If you correlate any variable with itself, it is a perfect 1, positive correlation. It doesn't tell us anything. 
+```
+But what do these numbers really mean? In the following table (which I've reproduced from the textbook), you should get a pretty good idea. 
+
+```{r}
+library(knitr)
+knitr::kable(
+rbind(
+c("-1.0 to -0.9" ,"Very strong", "Negative"),
+c("-0.9 to -0.7", "Strong", "Negative") ,
+c("-0.7 to -0.4", "Moderate", "Negative") ,
+c("-0.4 to -0.2", "Weak", "Negative"),
+c("-0.2 to 0","Negligible", "Negative") ,
+c("0 to 0.2","Negligible", "Positive"),
+c("0.2 to 0.4", "Weak", "Positive"), 
+c("0.4 to 0.7", "Moderate", "Positive"), 
+c("0.7 to 0.9", "Strong", "Positive"), 
+c("0.9 to 1.0", "Very strong", "Positive")), col.names=c("Correlation", "Strength", "Direction"),
+  booktabs = TRUE)
+
+
+```
+The true meaning of value of correlation does, however, tend to be very field specific - I would recommend checking with other researchers in your field, rather than basing your interpretation off of this table if you conduct your own research.
+So while my 0.5 correlation from earlier is somewhat moderate, a correlation of 0.7 or higher is strong. 
+
+Let's look at another way to visualize correlation! We'll download a new package now, called corrplot.
+
+```{r}
+library(corrplot)
+#Corrplot allows us to view different correlations using different colors. 
+
+corrplot(cor(vars_twitch), method = 'number')
+#corrplot is the function(either need a correlation table or you can use the corrleation function on the data--in this example it is vars_twitch), method = number, this is the type of corplot you want to make. 
+```
+Corplot uses color to help visualize the correlations for strengths and direction (red is negative, blue is positive)(light is weak, dark is strong) It also rounds the correlations so it is easier to view
+
+
+In this version, blue numbers are positively correlated, while red numbers are negatively correlated. 
+
+Let's look at some variations using corrpolot:
+
+```{r}
+corrplot(cor(vars_twitch), method = 'color', order = 'alphabet')
+```
+This creates a much simplified version of the correlation table, but the idea is the same, darker squares for stronger correlations, lighter squares for weak correlations, blue for positive and red for negative 
+
+```{r}
+corrplot(cor(vars_twitch))
+#another easy to view version of the correlation table
+```
+These are really cool! You can find more info about corrplot at: https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html. 
+
+References
+
+Mishra, A. (2020). Top Streamers on Twitch. [Data Set]. Retrieved from: https://www.kaggle.com/datasets/aayushmishra1512/twitchdata. 
+
+Navarro, D. (2019). Learning Statistics with R. Retrieved from:
+https://learningstatisticswithr.com/book/index.html. 
+

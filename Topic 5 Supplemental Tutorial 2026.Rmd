@@ -1,0 +1,178 @@
+Welcome to Topic 5 of the course! This week, we will be learning about descriptive statistics and correlation, both of which are foundational topics to understanding basic statistics. 
+
+Descriptive statistics allow us to understand and really get to know our data - so far, we've learned some simple descriptive statistics, like how to find the mean, minimum, and maximum of a variable. In this section, we will dig deeper into descriptive statistics.
+
+Why do we call them "descriptive"? Put simply, these statistics help us to describe the data - we do not use descriptive statistics to test the relationships between variables (this is called inferential statistics). Before you can conduct any statistical analysis, knowing your data is very important. I will demonstrate different ways to get to know your data in this tutorial. 
+
+```{r}
+
+#To start, let's load in some packages and data:
+
+library(dplyr)
+library(ggplot2)
+library(lsr)
+
+setwd("/Users/aidenstanton/projects/R")
+height <- read.csv("heights25.csv")
+```
+_________________________________________________________________________
+Histograms: Topic 5
+_________________________________________________________________________
+
+[Function of a Histogram] It shows the distribution of all possible values in the data set and how frequently those values occur. 
+
+First, let's talk about visualizing the distribution of the data. A distribution simply shows us all of the possible values of our data, and how frequently those values occur-eg, how many observations contain that specific value. Let's start by looking at the most common way to visualize a distribution: the histogram. 
+
+X axis- is the value of each data point
+Y-axis- frequency each value occurs within the data set (how many observations contain each value. In this example, how many people are each height)
+
+ggplot(data frame, aes(x = variable values, dependent))+
+  geom_histogram(fill = "inside box color", color = "box outline color")+
+  theme_minimal(optional, just a nice formatting option)
+  
+  aes= "aesthetic layer"
+
+```{r}
+ggplot(height, aes(x = Height))+
+  geom_histogram(fill = "deepskyblue", color = "black")+
+  theme_minimal()
+```
+
+In this instance, the x-axis is height in inches and the y axis is the number of people in the sample who are that height. 4 people are 71 inches tall. 
+
+Now let's try this out with the twitch data in the Topic 5 Twitch Tutorial
+
+_________________________________________________________________________
+Median Absolute Deviation (MAD): Topic 5
+_________________________________________________________________________
+
+player1 <- c(10, 8, 10, 10, 12)
+player2 <- c(2, 20, 8, 18, 2)
+
+[What is Median Absolute Deviation?] It is the median deviation that each data point is from the median of the sample. It is more resistant to outliers than SD because outliers can skew the mean.  Remember the twitch data that had outliers which made the mean higher than the median. AAD (Average Absolute Deviation) caclulates the deviation from the mean. MAD is better to use when your data is skewed by outliers. 
+
+player2 <- c(2, 20, 8, 18, 2)
+median(player2)
+
+[calculating MAD by hand for player 2] 
+
+value median  deviation  absolute value
+2 -   8 =       -6          |-6|=6 
+20 -  8 =       12           12
+8 -   8 =        0            0   
+18 -  8 =       10           10
+2 -   8 =       -6           |-6|=6   
+
+0,6,6,10,12
+Median Absolute Deviation for Player 2 = 6
+
+mad( x = datasample, constant = 1 )
+#mad stands for median absolute deviation, x = vector/object, constant = 1
+
+```{r}
+mad(x = player2, constant = 1)
+```
+
+MAD can be used when the data is skewed, meaning it is not normally distributed. 
+
+```{r}
+mad(x=height$Height, constant=1)
+sd(height$Height)
+```
+
+___________________________________________
+Topic 5: Variance and Standard Deviation
+_____________________________________
+
+Additional Info: https://www.nlm.nih.gov/oet/ed/stats/02-900.html
+
+What is variance: it is the average of squared differences from the mean. It is a measure of how spread out the data is. Not typically reported by itself, but it is used to calculate the standard deviation which is a the square root of the variance. 
+
+What is Standard Deviation? The average of how much each value in the data deviates from the mean. It tells you how clustered or how dispersed the data is from the mean.  A high SD means more variation. A low SD means less variation. 
+
+[Why do we care about standard deviation? ]
+1) You can compare individual data points to a larger population
+2) You can use SD to identify outliers. Most data is contained within 2 standard deviations from the mean, so if a data point is 3 standard deviations from the mean or higher it is way above the average. 
+
+3) You can use it to make predictions or understand reliability
+
+Lets say you have two different basketball players. Here are the number of points they scored for 5 games. Each player has a mean of 10 points per game. Which player is more consistent?
+
+player1 <- c(10, 8, 10, 10, 12)
+mean(player1)
+
+[calculating SD by hand for player 1] 
+                                                          SumSq / N    Sqrt ( SumSq / N)
+value mean  deviation  square deviation  sum of squares    variance   deviation
+10 -   10 =     0         0^2 = 0         0+0+0+4+4= 8      8/5      sqrt(8/5)=1.26
+8  -   10 =    -2        -2^2 = 4
+10 -   10 =     0         0^2 = 0   
+10 -   10 =     0         0^2 = 0
+12 -   10 =     2         2^2 = 4
+
+**r calculates sd using N-1 in the denominator of the variance (N-1 = 4 in our example). This is a statistical correction because it is a less biased estimate for the true population sd which in most cases is never actually known.**  Sqrt ( SumSq / N-1)
+
+**to clarify, SD for the sample is NOT THE SAME as the SD for the population. What r calculates is the ESTIMATED SD FOR THE POPULATION, not the sample SD. The sample SD is always lower than the estimated population SD (for player 1, 1.26 sample SD is lower than 1.4, estimate pop SD)**
+
+player1 <- c(10, 8, 10, 10, 12)
+player2 <- c(2, 20, 8, 18, 2)
+
+```{r}
+mean(player1)
+mean(player2)
+
+```
+
+mean(player1)
+mean(player2)
+
+We can look at each player's standard deviation. The player that is closer to 0 has less variation.
+
+```{r}
+sd(player1)
+sd(player2)
+```
+Player 1 is more consistent because their SD is closer to 0 than player 2. Player 2's scores are more variable than Player 1. 
+
+4) It can be used to make predictions about the data. In a normal distribution 68% of data falls within 1 SD of the mean. 95% of the data falls within 2 SD of the mean.
+
+height <- read.csv("heights25.csv")
+
+```{r}
+mean(height$Height)
+sd(height$Height)
+```
+The mean in this sample is 66.5 inches. 1 standard deviation is +/- 6.6 inches from the mean (59.9-73.1). 2 standard deviations is +/- 13.2 inches from the mean. 
+
+
+_________________________________________________________________________
+Standard Error of the Mean (SEM): Topic 5
+_________________________________________________________________________
+
+What is the standard error of the mean (SEM): it measures the accuracy of the sample mean as an estimate of the population mean. How well does the sample represent the population?
+
+SEM is the standard deviation/square root of the number of observations in the sample
+
+However, we almost never know the population SD, so we really use our estimated SD. sd(estimate)/sqrt(number of observations)
+
+SEM is affected by sample size. A the sample size increases SEM decreases. As the sample size increases it is becoming more representative of the population.
+
+Let's look at the SEM for the players from the basketball example
+
+```{r}
+
+sd(player1)/sqrt(5)
+sd(player2)/sqrt(5)
+```
+A smaller SEM tells us that the sample is closer to the true population mean. 
+
+For our basketball players, our sample for player 1 is a more precise estimate of the true population mean (the mean of all the points earned by player 1 for every game played). 
+
+Player 2's sample is a less precise estimate of the true population mean for player 2 (the mean of all the points earned by player 2 for every game played)
+
+Why report the SEM: We will use this in hypothesis testing, p-values, and confidence intervals (SEM is in the larger formulas for each of these) to help us make conclusions about the population where the sample comes from. 
+
+"When we calculate the sample mean we are usually interested not in the mean of this particular sample, but in the mean for individuals of this type—in statistical terms, of the population from which the sample comes" (Altman & Bland 2005)
+
+Ok, now back to the topic 5 tutorial
+
